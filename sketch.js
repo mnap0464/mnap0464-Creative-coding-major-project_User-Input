@@ -211,7 +211,7 @@ function draw() {
 
   //game physics and logic
     gravity();
-    game();
+    game(); //call game logic after gravity to apply current position changes
   
     //ground
     image(ground, groundX, groundY, groundWidth, groundHeight);
@@ -346,72 +346,48 @@ class ImageSegment {
 
 //////game
   function game (){
-    //collision for platforms
-    if (playerX >= platform1X - platformWidth/2 &&
-        playerX <= platform1X + platformWidth/2 &&
-        playerY + playerHeight / 2 >= platform1Y - platformHeight/2 && 
-        playerY + playerHeight / 2 <= platform1Y + platformHeight/2 && 
-        jump == false)
-      {
-      playerY = platform1Y  -  platformHeight/2 - playerHeight/2;
-      velocity = 0;
-      jumpCunter = 0;
+
+  /**
+ * The following lines were taken from Gemini. I require to solve the 
+ * "magnet" problem. because the player couldnt left the platform, he was 
+ * magnet stuck on them..
+ */
+  const platformsArray = [
+    {x: platform1X, y: platform1Y},
+    {x: platform2X, y: platform2Y},
+    {x: platform3X, y: platform3Y},
+    {x: platform4X, y: platform4Y},
+    {x: platform5X, y: platform5Y},
+    {x: platform6X, y: platform6Y}
+  ];
+
+  let onPlatform = false; // Flag to check if player is currently on any platform
+
+  for (let i = 0; i < platformsArray.length; i++) {
+    let currentPlatformX = platformsArray[i].x;
+    let currentPlatformY = platformsArray[i].y;
+
+    // MAIN CHANGE: Refined platform collision logic
+    // Check if player is horizontally aligned with the platform
+    if (playerX + playerWidth / 2 > currentPlatformX - platformWidth / 2 &&
+        playerX - playerWidth / 2 < currentPlatformX + platformWidth / 2) {
+
+      // Check if player is falling AND their bottom is passing the platform's top
+      if (playerY + playerHeight / 2 >= currentPlatformY - platformHeight / 2 &&
+          playerY + playerHeight / 2 <= currentPlatformY - platformHeight / 2 + fallingSpeed) { // Check slightly below platform top
+        // Player has landed on the platform
+        playerY = currentPlatformY - platformHeight / 2 - playerHeight / 2; // Snap to top of platform
+        velocity = 0; // Stop vertical movement
+        jumpCunter = 0; // Reset jump counter
+        jump = false; // Ensure jump state is off
+        onPlatform = true; // Mark that player is on a platform
+        break; // Exit loop, player is on this platform
+      }
     }
-  
-  //2
-  if (playerX >= platform2X - platformWidth/2 &&
-    playerX <= platform2X + platformWidth/2 &&
-    playerY + playerHeight / 2 >= platform2Y - platformHeight/2 &&
-    playerY - playerHeight / 2 <= platform2Y + platformHeight/2 &&
-    jump == false){
-  playerY = platform2Y - platformHeight/2 - playerHeight/2;
-  velocity = 0;
-  jumpCunter = 0;
   }
-
-  //3
-  if (playerX >= platform3X - platformWidth/2 &&
-    playerX <= platform3X + platformWidth/2 &&
-    playerY + playerHeight / 2 >= platform3Y - platformHeight/2 &&
-    playerY - playerHeight / 2 <= platform3Y + platformHeight/2 &&
-    jump == false){
-  playerY = platform3Y - platformHeight/2 - playerHeight/2;
-  velocity = 0;
-  jumpCunter = 0;
-  }
-
-  //4
-  if (playerX >= platform4X - platformWidth/2 &&
-    playerX <= platform4X + platformWidth/2 &&
-    playerY + playerHeight / 2 >= platform4Y - platformHeight/2 &&
-    playerY - playerHeight / 2 <= platform4Y + platformHeight/2 &&
-    jump == false){
-  playerY = platform4Y - platformHeight/2 - playerHeight/2;
-  velocity = 0;
-  jumpCunter = 0;
-  }
-  //5
-  if (playerX >= platform5X - platformWidth/2 &&
-    playerX <= platform5X + platformWidth/2 &&
-    playerY + playerHeight / 2 >= platform5Y - platformHeight/2 &&
-    playerY - playerHeight / 2 <= platform5Y + platformHeight/2 &&
-    jump == false){
-  playerY = platform5Y - platformHeight/2 - playerHeight/2;
-  velocity = 0;
-  jumpCunter = 0;
-  }
-
-  //6
-  if (playerX >= platform6X - platformWidth/2 &&
-    playerX <= platform6X + platformWidth/2 &&
-    playerY + playerHeight / 2 >= platform6Y - platformHeight/2 &&
-    playerY - playerHeight / 2 <= platform6Y + platformHeight/2 &&
-    jump == false){
-  playerY = platform6Y - platformHeight/2 - playerHeight/2;
-  velocity = 0;
-  jumpCunter = 0;
-  }
-  //the player is still attracted by the collisions of the platforms like a magnet.
+  // Ensure gravity continues if not on any platform
+  // This part is handled by the gravity function, but it's good to note that
+  // if onPlatform is false, then gravity should apply.
 }
 
 
