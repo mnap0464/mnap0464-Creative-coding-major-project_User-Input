@@ -1,10 +1,16 @@
 //backgroung image variable
-let img;
+let img; // Original background mosaic image
+let sacry; // Declare the scary image
 let numSegments = 200;
 let segments = [];
 let drawSegments = true;
 let imgDrwPrps = {aspect: 0, width: 0, height: 0, xOffset: 0, yOffset: 0};
 let canvasAspectRatio = 0;
+
+// NEW: Variables for scary mosaic effect
+let showScaryMosaic = false; // Flag to draw the scary mosaic
+let scaryMosaicTimer = 0;   // Timer for how long the scary mosaic is active
+const SCARY_MOSAIC_DURATION = 30; // Duration in frames (30 frames)
 
 //Game
 var stage = 0;
@@ -114,6 +120,8 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   imgDrwPrps.aspect = img.width / img.height;
   calculateImageDrawProps();
+  // The segment creation loop should use the *original* 'img' for initial setup.
+  // The dynamically change which image is used later.
   let segmentWidth = img.width / numSegments;
   let segmentHeight = img.height / numSegments;
   let positionInColumn = 0;
@@ -143,9 +151,36 @@ function setup() {
 function draw() {
   //backgroung image
   background(0);
+
+  //Control which image is used for the mosaic based on showScaryMosaic flag
   if (drawSegments) {
-    for (const segment of segments) {
-      segment.drawMosaicSegment();
+    // If scary mosaic is active, use its segments
+    if (showScaryMosaic) {
+      let currentMosaicImage = showScaryMosaic ? sacry : img;
+      for (const segment of segments) {
+        let segX = segment.rowPostion * (currentMosaicImage.width / numSegments);
+        let segY = segment.columnPosition * (currentMosaicImage.height / numSegments);
+        segment.srcImgSegColour = currentMosaicImage.get(segX + (currentMosaicImage.width / numSegments) / 2, 
+        segY + (currentMosaicImage.height / numSegments) / 2);
+        segment.drawMosaicSegment();
+      }
+      scaryMosaicTimer--; // Decrement timer
+      if (scaryMosaicTimer <= 0) {
+        showScaryMosaic = false; // Turn off scary mosaic
+        // Reset segment colors to original image
+        let originalImage = img;
+        for (const segment of segments) {
+          let segX = segment.rowPostion * (originalImage.width / numSegments);
+          let segY = segment.columnPosition * (originalImage.height / numSegments);
+          segment.srcImgSegColour = originalImage.get(segX + (originalImage.width / numSegments) / 2, 
+          segY + (originalImage.height / numSegments) / 2);
+        }
+      }
+    } else {
+      // Draw normal mosaic segments
+      for (const segment of segments) {
+        segment.drawMosaicSegment();
+      }
     }
   } else {
     image(img, imgDrwPrps.xOffset, imgDrwPrps.yOffset, imgDrwPrps.width, imgDrwPrps.height);
@@ -199,6 +234,9 @@ function draw() {
       playerY >= enemy1Y  - enemyHeight/2 &&
       playerY <= enemy1Y  + enemyHeight/2){
         lives = lives-1;
+        // Activate scary mosaic effect
+        showScaryMosaic = true;
+        scaryMosaicTimer = SCARY_MOSAIC_DURATION; // Set timer
       }
 
     //the note are point
@@ -281,7 +319,7 @@ class ImageSegment {
   constructor(columnPositionInPrm, rowPostionInPrm  ,srcImgSegColourInPrm) {
     this.columnPosition = columnPositionInPrm;
     this.rowPostion = rowPostionInPrm;
-    this.srcImgSegColour = srcImgSegColourInPrm;
+    this.srcImgSegColour = srcImgSegColourInPrm; // This color will be updated in draw()
     this.drawXPos = 0;
     this.drawYPos = 0;
     this.drawWidth = 0;
@@ -313,10 +351,9 @@ class ImageSegment {
         playerX <= platform1X + platformWidth/2 &&
         playerY + playerHeight / 2 >= platform1Y - platformHeight/2 && 
         playerY + playerHeight / 2 <= platform1Y + platformHeight/2 && 
-        //velocity >= 0
         jump == false)
       {
-      playerY = platform1Y  - 125 //platformHeight/2 - playerHeight/2;
+      playerY = platform1Y  -  platformHeight/2 - playerHeight/2;
       velocity = 0;
       jumpCunter = 0;
     }
@@ -326,9 +363,8 @@ class ImageSegment {
     playerX <= platform2X + platformWidth/2 &&
     playerY + playerHeight / 2 >= platform2Y - platformHeight/2 &&
     playerY - playerHeight / 2 <= platform2Y + platformHeight/2 &&
-    //velocity >= 0
     jump == false){
-  playerY = platform2Y - 125 //platformHeight/2 - playerHeight/2;
+  playerY = platform2Y - platformHeight/2 - playerHeight/2;
   velocity = 0;
   jumpCunter = 0;
   }
@@ -338,9 +374,8 @@ class ImageSegment {
     playerX <= platform3X + platformWidth/2 &&
     playerY + playerHeight / 2 >= platform3Y - platformHeight/2 &&
     playerY - playerHeight / 2 <= platform3Y + platformHeight/2 &&
-    //velocity >= 0
     jump == false){
-  playerY = platform3Y - 125 //platformHeight/2 - playerHeight/2;
+  playerY = platform3Y - platformHeight/2 - playerHeight/2;
   velocity = 0;
   jumpCunter = 0;
   }
@@ -350,9 +385,8 @@ class ImageSegment {
     playerX <= platform4X + platformWidth/2 &&
     playerY + playerHeight / 2 >= platform4Y - platformHeight/2 &&
     playerY - playerHeight / 2 <= platform4Y + platformHeight/2 &&
-    //velocity >= 0
     jump == false){
-  playerY = platform4Y - 125 //platformHeight/2 - playerHeight/2;
+  playerY = platform4Y - platformHeight/2 - playerHeight/2;
   velocity = 0;
   jumpCunter = 0;
   }
@@ -361,9 +395,8 @@ class ImageSegment {
     playerX <= platform5X + platformWidth/2 &&
     playerY + playerHeight / 2 >= platform5Y - platformHeight/2 &&
     playerY - playerHeight / 2 <= platform5Y + platformHeight/2 &&
-    //velocity >= 0
     jump == false){
-  playerY = platform5Y - 125 //platformHeight/2 - playerHeight/2;
+  playerY = platform5Y - platformHeight/2 - playerHeight/2;
   velocity = 0;
   jumpCunter = 0;
   }
@@ -373,13 +406,12 @@ class ImageSegment {
     playerX <= platform6X + platformWidth/2 &&
     playerY + playerHeight / 2 >= platform6Y - platformHeight/2 &&
     playerY - playerHeight / 2 <= platform6Y + platformHeight/2 &&
-    //velocity >= 0
     jump == false){
-  playerY = platform6Y - 125 //platformHeight/2 - playerHeight/2;
+  playerY = platform6Y - platformHeight/2 - playerHeight/2;
   velocity = 0;
   jumpCunter = 0;
   }
-  
+  //the player is still attracted by the collisions of the platforms like a magnet.
 }
 
 
