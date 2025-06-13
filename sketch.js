@@ -12,16 +12,50 @@ var stage = 0;
 //player
 var Jhonny;
 var playerX = 593;
-var playerY = 675;
+var playerY = 700;
 var playerWidth = 187;
 var playerHeight = 187;
 
+//enemy
+var enemy;
+var enemy1X = 150;
+var enemy1Y = 700;
+var enemyWidth = 130;
+var enemyHeight = 100;
+
 // platforms
 var platforms;
+//1
 var platform1X = 145;
-var platform1Y = 500;
+var platform1Y = 530;
 var platformWidth = 290;
 var platformHeight = 99;
+//2
+var platform2X = 630;
+var platform2Y = 530;
+//3
+var platform3X = 350;
+var platform3Y = 280;
+//4
+var platform4X = 1000;
+var platform4Y = 280;
+//5
+var platform5X = 1350;
+var platform5Y = 530;
+//6
+var platform6X = 1650;
+var platform6Y = 280;
+
+// music note
+var note
+var noteX = 593;
+var noteY = 700;
+var noteWidth = 100;
+var noteHeight = 99;
+
+//counters
+var score = 0;
+var lives = 3;
 
 
 
@@ -38,10 +72,10 @@ var groundHeight = 502;
 var jump = false;
 var direction = 1;
 var velocity = 2;
-var jumpPower = 15;
+var jumpPower = 20;
 var fallingSpeed = 2; 
 var minHeight = 760; 
-var maxHeight = 50; 
+var maxHeight = 10; 
 var jumpCunter = 0; 
 
 
@@ -58,6 +92,12 @@ function preload() {
   ground = loadImage ("assets/ground.png");
    //image for stage 0
   nyc = loadImage ("assets/nyc .jpg")
+  //the note are point
+  note = loadImage ("assets/music-note_11336134.png");
+  //the instrument are enemy
+  enemy = loadImage ("assets/enemy.png");
+  //hit the enemy and cange the backgroung image
+  sacry = loadImage ("assets/scary.png");
 }
 
 
@@ -111,6 +151,10 @@ function draw() {
     image(img, imgDrwPrps.xOffset, imgDrwPrps.yOffset, imgDrwPrps.width, imgDrwPrps.height);
   }
 
+
+
+
+
   if (stage == 0) {
     splash(); 
   } else if (stage == 1) { 
@@ -129,15 +173,57 @@ function draw() {
     }
   }
 
+
+  //game physics and logic
     gravity();
     game();
   
+    //ground
+    image(ground, groundX, groundY, groundWidth, groundHeight);
+
+    //player
+    image(Jhonny, playerX, playerY, playerWidth, playerHeight);
+
+    //platforms
+    image(platforms, platform1X, platform1Y, platformWidth, platformHeight);
+    image(platforms, platform2X, platform2Y, platformWidth, platformHeight);
+    image(platforms, platform3X, platform3Y, platformWidth, platformHeight);
+    image(platforms, platform4X, platform4Y, platformWidth, platformHeight);
+    image(platforms, platform5X, platform5Y, platformWidth, platformHeight);
+    image(platforms, platform6X, platform6Y, platformWidth, platformHeight);
+
+    //enemy
+    image(enemy, enemy1X, enemy1Y, enemyWidth, enemyHeight);
+    if(playerX >= enemy1X - enemyWidth/2 &&
+      playerX <= enemy1X + enemyWidth/2 &&
+      playerY >= enemy1Y  - enemyHeight/2 &&
+      playerY <= enemy1Y  + enemyHeight/2){
+        lives = lives-1;
+      }
+
+    //the note are point
+    image(note, noteX, noteY, noteWidth, noteHeight);
+    if(playerX >= noteX - noteWidth/2 && 
+      playerX <= noteX + noteWidth/2  &&
+      playerY >= noteY - noteHeight/2 &&
+      playerY <= noteY + noteHeight/2 
+    ){
+      score = score + 1;
+      noteX = - 10000;
+    }
 
 
-  image(Jhonny, playerX, playerY, playerWidth, playerHeight);
-  image(platforms, platform1X, platform1Y, platformWidth, platformHeight);
-  image(ground, groundX, groundY, groundWidth, groundHeight);
+    //score board
+    textSize(25);
+    fill(255);
+    text("Piont:", 50, 50);
+    text(score, 110, 50);
 
+    //lives
+    textSize(25);
+    fill(255);
+    text("Lives:", 50, 80);
+    text(lives, 110, 80);
 }
 
 
@@ -145,7 +231,6 @@ function splash(){
   image(nyc, windowWidth/2, windowHeight/2,windowWidth, windowHeight);
 
   textSize(100);
-  textFont("NovaSquare");
   fill(255);
   textAlign(CENTER, CENTER); 
   text("jhonnyyyyyy", width/2, height/2); 
@@ -194,7 +279,6 @@ function calculateImageDrawProps() {
 class ImageSegment {
   //backgroung image 
   constructor(columnPositionInPrm, rowPostionInPrm  ,srcImgSegColourInPrm) {
-
     this.columnPosition = columnPositionInPrm;
     this.rowPostion = rowPostionInPrm;
     this.srcImgSegColour = srcImgSegColourInPrm;
@@ -202,10 +286,7 @@ class ImageSegment {
     this.drawYPos = 0;
     this.drawWidth = 0;
     this.drawHeight = 0;
-  
-    
   }
-
   calculateSegDrawProps() {
     //backgroung image 
     this.drawWidth = imgDrwPrps.width / numSegments;
@@ -227,20 +308,80 @@ class ImageSegment {
 
 //////game
   function game (){
+    //collision for platforms
     if (playerX >= platform1X - platformWidth/2 &&
         playerX <= platform1X + platformWidth/2 &&
         playerY + playerHeight / 2 >= platform1Y - platformHeight/2 && 
         playerY + playerHeight / 2 <= platform1Y + platformHeight/2 && 
-        velocity >= 0)
+        //velocity >= 0
+        jump == false)
       {
-      playerY = platform1Y - platformHeight/2 - playerHeight/2;
+      playerY = platform1Y  - 125 //platformHeight/2 - playerHeight/2;
       velocity = 0;
       jumpCunter = 0;
     }
   
-  
+  //2
+  if (playerX >= platform2X - platformWidth/2 &&
+    playerX <= platform2X + platformWidth/2 &&
+    playerY + playerHeight / 2 >= platform2Y - platformHeight/2 &&
+    playerY - playerHeight / 2 <= platform2Y + platformHeight/2 &&
+    //velocity >= 0
+    jump == false){
+  playerY = platform2Y - 125 //platformHeight/2 - playerHeight/2;
+  velocity = 0;
+  jumpCunter = 0;
+  }
+
+  //3
+  if (playerX >= platform3X - platformWidth/2 &&
+    playerX <= platform3X + platformWidth/2 &&
+    playerY + playerHeight / 2 >= platform3Y - platformHeight/2 &&
+    playerY - playerHeight / 2 <= platform3Y + platformHeight/2 &&
+    //velocity >= 0
+    jump == false){
+  playerY = platform3Y - 125 //platformHeight/2 - playerHeight/2;
+  velocity = 0;
+  jumpCunter = 0;
+  }
+
+  //4
+  if (playerX >= platform4X - platformWidth/2 &&
+    playerX <= platform4X + platformWidth/2 &&
+    playerY + playerHeight / 2 >= platform4Y - platformHeight/2 &&
+    playerY - playerHeight / 2 <= platform4Y + platformHeight/2 &&
+    //velocity >= 0
+    jump == false){
+  playerY = platform4Y - 125 //platformHeight/2 - playerHeight/2;
+  velocity = 0;
+  jumpCunter = 0;
+  }
+  //5
+  if (playerX >= platform5X - platformWidth/2 &&
+    playerX <= platform5X + platformWidth/2 &&
+    playerY + playerHeight / 2 >= platform5Y - platformHeight/2 &&
+    playerY - playerHeight / 2 <= platform5Y + platformHeight/2 &&
+    //velocity >= 0
+    jump == false){
+  playerY = platform5Y - 125 //platformHeight/2 - playerHeight/2;
+  velocity = 0;
+  jumpCunter = 0;
+  }
+
+  //6
+  if (playerX >= platform6X - platformWidth/2 &&
+    playerX <= platform6X + platformWidth/2 &&
+    playerY + playerHeight / 2 >= platform6Y - platformHeight/2 &&
+    playerY - playerHeight / 2 <= platform6Y + platformHeight/2 &&
+    //velocity >= 0
+    jump == false){
+  playerY = platform6Y - 125 //platformHeight/2 - playerHeight/2;
+  velocity = 0;
+  jumpCunter = 0;
   }
   
+}
+
 
 
 
